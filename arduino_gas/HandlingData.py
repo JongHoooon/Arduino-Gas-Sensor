@@ -4,11 +4,14 @@ import numpy as np
 import serial
 
 
-###########################################################
+""" configure arduino """
+
 serial_port = '/dev/tty.usbserial-2130'
 serial_baudrate = 9600
 
 seri = serial.Serial(serial_port, serial_baudrate)
+
+# configure graph
 
 fig = plt.figure()
 ax = plt.axes(xlim = (0, 1000), ylim = (0, 50))
