@@ -5,7 +5,7 @@ import serial
 
 
 ###########################################################
-serial_port = '/dev/tty.usbserial-1130'
+serial_port = '/dev/tty.usbserial-2130'
 serial_baudrate = 9600
 
 seri = serial.Serial(serial_port, serial_baudrate)
@@ -13,10 +13,6 @@ seri = serial.Serial(serial_port, serial_baudrate)
 fig = plt.figure()
 ax = plt.axes(xlim = (0, 1000), ylim = (0, 50))
 
-plt.errorbar(x, y + 1, yerr=yerr, label = "co 1")
-plt.errorbar(x, y, yerr=yerr, label = "co 2") 
-
-plt.errorbar()
 
 
 max_points = 1000
@@ -38,6 +34,7 @@ def getData():
                 print(res)
                 return float(res[2])
     except Exception as ex:
+        print("error")
         print(ex)
         pass
     return -1
