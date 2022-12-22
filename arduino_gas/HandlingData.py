@@ -1,8 +1,12 @@
 from matplotlib.pylab import *
 from mpl_toolkits.axes_grid1 import host_subplot
 from matplotlib import animation
+from matplotlib.animation import writers
 import numpy as np
 import serial
+
+import pandas as pd
+import openpyxl
 
 
 ###### configure arduino #####
@@ -20,8 +24,8 @@ font = {'size': 9}
 rc('font', **font)
 
 # setup figure and subplots
-f0 = figure(num = 0, figsize = (12, 12))
-f0.suptitle("Off Gas", fontsize = 12)
+f0 = figure(num=0, figsize=(12, 12))
+f0.suptitle("Off Gas", fontsize=12)
 
 ax01 = subplot2grid((2, 2), (0, 0))
 ax02 = subplot2grid((2, 2), (0, 1))
@@ -69,25 +73,29 @@ co_2 = zeros(0)
 t = zeros(0)
 
 # set plots
-p011, = ax01.plot(t, lpg_1, "b-", label = "LPG")
-p012, = ax01.plot(t, ch4_1, "g-", label = "CH4")
-p013, = ax01.plot(t, co_1_1, "r-", label = "CO")
+p011, = ax01.plot(t, lpg_1, "b-", label="LPG")
+p012, = ax01.plot(t, ch4_1, "g-", label="CH4")
+p013, = ax01.plot(t, co_1_1, "r-", label="CO")
 
-p021, = ax02.plot(t, co_1_2, "r-", label = "CO")
+p021, = ax02.plot(t, co_1_2, "r-", label="CO")
 
-p031, = ax03.plot(t, co_2, "r-", label = "CO")
+p031, = ax03.plot(t, co_2, "r-", label="CO")
 
-ax01.legend([p011, p012, p013], 
+ax01.legend([p011, p012, p013],
             [p011.get_label(), p012.get_label(), p013.get_label()])
-ax02.legend([p021], 
+ax02.legend([p021],
             [p021.get_label()])
-ax03.legend([p031], 
+ax03.legend([p031],
             [p031.get_label()])
 
 # Data Update
 xmin = 0.0
 xmax = 60.0
 x = 0.0
+
+df = pd.DataFrame([[0, 0, 0, 0]],
+                  index=[0],
+                  columns=["LPG", "CH4", "CO", "CO"])
 
 
 def updateDate(self):
@@ -98,6 +106,8 @@ def updateDate(self):
     global co_1_2
     global co_2
     global t
+    
+    global df
 
     try:
         if seri.readable():
@@ -114,7 +124,7 @@ def updateDate(self):
                 lpg_1 = append(lpg_1, res[0])
                 ch4_1 = append(ch4_1, res[1])
                 co_1_1 = append(co_1_1, res[2])
-                
+
                 co_1_2 = append(co_1_2, res[2])
                 co_2 = append(co_2, res[3])
                 t = append(t, x)
@@ -126,23 +136,32 @@ def updateDate(self):
                 p013.set_data(t, co_1_1)
 
                 p021.set_data(t, co_1_2)
-                
+
                 p031.set_data(t, co_2)
-                
-                ax01.set_title(f"first MQ9\nLPG: {lpg_1[-1]}, CH4: {ch4_1[-1]}, CO: {co_1_1[-1]}")
+
+                ax01.set_title(
+                    f"first MQ9\nLPG: {lpg_1[-1]}, CH4: {ch4_1[-1]}, CO: {co_1_1[-1]}")
                 ax02.set_title(f"first MQ9\nCO: {co_1_2[-1]}")
                 ax03.set_title(f"second MQ9\nCO: {co_2[-1]}")
+
+                append_df = pd.DataFrame(data=[res], 
+                                        index=[x], 
+                                        columns=["LPG", "CH4", "CO", "CO"])
                 
-                
+                df = pd.concat([df, append_df])
+
+                df.to_excel(
+                    "/Users/bromp/Desktop/study/Arduino-Gas-Sensor/arduino_gas/Off-Gas.xlsx")
+
                 if x >= xmax-10.00:
                     p011.axes.set_xlim(x-xmax+10.0, x+10.0)
                     p012.axes.set_xlim(x-xmax+10.0, x+10.0)
                     p013.axes.set_xlim(x-xmax+10.0, x+10.0)
 
                     p021.axes.set_xlim(x-xmax+10.0, x+10.0)
-                    
+
                     p031.axes.set_xlim(x-xmax+10.0, x+10.0)
-                
+
                 return p011, p012, p013, p021, p031
 
     except Exception as ex:
@@ -152,17 +171,13 @@ def updateDate(self):
     return -1
 
 
-
-simulation = animation.FuncAnimation(f0, 
-                                     updateDate, 
-                                     blit = False,
-                                     interval = 500,
-                                     repeat = False)
+simulation = animation.FuncAnimation(f0,
+                                     updateDate,
+                                     blit=False,
+                                     interval=500,
+                                     repeat=False)
 
 plt.show()
-
-
-
 
 
 """"
