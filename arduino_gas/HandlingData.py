@@ -11,7 +11,7 @@ import openpyxl
 
 ###### configure arduino #####
 
-serial_port = '/dev/tty.usbserial-1140'
+serial_port = '/dev/tty.usbserial-140'
 serial_baudrate = 9600
 
 seri = serial.Serial(serial_port, serial_baudrate)
@@ -24,17 +24,20 @@ font = {'size': 9}
 rc('font', **font)
 
 # setup figure and subplots
-f0 = figure(num=0, figsize=(12, 12))
+f0 = figure(num=0, figsize=(16, 6))
 f0.suptitle("Off Gas", fontsize=12)
 
-ax01 = subplot2grid((2, 2), (0, 0))
-ax02 = subplot2grid((2, 2), (0, 1))
-ax03 = subplot2grid((2, 2), (1, 0))
+ax01 = subplot2grid((1, 4), (0, 0))
+ax02 = subplot2grid((1, 4), (0, 1))
+# ax03 = subplot2grid((1, 4), (0, 2))
+# ax04 = subplot2grid((1, 4), (0, 3))
 
 # set title
-ax01.set_title("first MQ9's LPG, CH4, CO")
-ax02.set_title("first MQ9's CO")
-ax03.set_title("second MQ9's CO")
+ax01.set_title("first MQ9's CH4, CO")
+ax02.set_title("second MQ9's CH4, CO")
+# ax03.set_title("third MQ9's CH4, CO")
+# ax04.set_title("Temperature")
+
 
 # set limites
 ax01.set_xlim(0, 60.0)
@@ -43,13 +46,18 @@ ax01.set_ylim(0, 50.0)
 ax02.set_xlim(0, 60.0)
 ax02.set_ylim(0, 50.0)
 
-ax03.set_xlim(0, 60.0)
-ax03.set_ylim(0, 50.0)
+# ax03.set_xlim(0, 60.0)
+# ax03.set_ylim(0, 50.0)
+
+# ax04.set_xlim(0, 60.0)
+# ax04.set_ylim(0, 300.0)
 
 # Turn on grids
 ax01.grid(True)
 ax02.grid(True)
-ax03.grid(True)
+# ax03.grid(True)
+# ax04.grid(True)
+
 
 # set label names
 ax01.set_xlabel("s")
@@ -58,55 +66,67 @@ ax01.set_ylabel("ppm")
 ax02.set_xlabel("s")
 ax02.set_ylabel("ppm")
 
-ax03.set_xlabel("s")
-ax03.set_ylabel("ppm")
+# ax03.set_xlabel("s")
+# ax03.set_ylabel("ppm")
+
+# ax04.set_xlabel("s")
+# ax04.set_ylabel("°C")
 
 # Data Placeholders
-lpg_1 = zeros(0)
 ch4_1 = zeros(0)
-co_1_1 = zeros(0)
+co_1 = zeros(0)
 
-co_1_2 = zeros(0)
-
+ch4_2 = zeros(0)
 co_2 = zeros(0)
+
+# ch4_3 = zeros(0)
+# co_3 = zeros(0)
+
+# temp = zeros(0)
 
 t = zeros(0)
 
 # set plots
-p011, = ax01.plot(t, lpg_1, "b-", label="LPG")
-p012, = ax01.plot(t, ch4_1, "g-", label="CH4")
-p013, = ax01.plot(t, co_1_1, "r-", label="CO")
+p011, = ax01.plot(t, ch4_1, "g-", label="CH4")
+p012, = ax01.plot(t, co_1, "r-", label="CO")
 
-p021, = ax02.plot(t, co_1_2, "r-", label="CO")
+p021, = ax02.plot(t, ch4_2, "g-", label="CH4")
+p022, = ax02.plot(t, co_2, "r-", label="CO")
 
-p031, = ax03.plot(t, co_2, "r-", label="CO")
+# p031, = ax03.plot(t, ch4_3, "g-", label="CH4")
+# p032, = ax03.plot(t, co_3, "r-", label="CO")
 
-ax01.legend([p011, p012, p013],
-            [p011.get_label(), p012.get_label(), p013.get_label()])
-ax02.legend([p021],
-            [p021.get_label()])
-ax03.legend([p031],
-            [p031.get_label()])
+# p04, = ax04.plot(t, temp, "-r", label="temp")
+
+ax01.legend([p011, p012],
+            [p011.get_label(), p012.get_label()])
+ax02.legend([p021, p022],
+            [p021.get_label(), p022.get_label()])
+# ax03.legend([p031, p032], [p031.get_label(), p032.get_label()])
+# ax04.legend([p04], [p04.get_label()])
 
 # Data Update
 xmin = 0.0
-xmax = 60.0
+xmax = 60
 x = 0.0
 
 df = pd.DataFrame([[0, 0, 0, 0]],
                   index=[0],
-                  columns=["LPG", "CH4", "CO", "CO"])
+                  columns=["CH4_1", "CO_1",
+                           "CH4_2", "CO_2"])
 
 
 def updateDate(self):
     global x
-    global lpg_1
     global ch4_1
-    global co_1_1
-    global co_1_2
+    global co_1
+    global ch4_2
     global co_2
+    # global ch4_3
+    # global co_3
+    # global temp
     global t
-    
+
     global df
 
     try:
@@ -118,36 +138,46 @@ def updateDate(self):
                 ret = ret.replace("\r", "")
                 res = ret.split(":")[1]
                 res = res.split(",")
-                res = list(map(float, res))
+                # print(res)
+                res = list(map(double, res))
                 print(res)
 
-                lpg_1 = append(lpg_1, res[0])
-                ch4_1 = append(ch4_1, res[1])
-                co_1_1 = append(co_1_1, res[2])
+                ch4_1 = append(ch4_1, res[0])
+                co_1 = append(co_1, res[1])
 
-                co_1_2 = append(co_1_2, res[2])
+                ch4_2 = append(ch4_2, res[2])
                 co_2 = append(co_2, res[3])
+
+                # ch4_3 = append(ch4_3, res[4])
+                # co_3 = append(co_3, res[5])
+                
+                # temp = append(temp, res[6])
+
                 t = append(t, x)
 
                 x += 0.5
 
-                p011.set_data(t, lpg_1)
-                p012.set_data(t, ch4_1)
-                p013.set_data(t, co_1_1)
+                p011.set_data(t, ch4_1)
+                p012.set_data(t, co_1)
 
-                p021.set_data(t, co_1_2)
+                p021.set_data(t, ch4_2)
+                p022.set_data(t, co_2)
 
-                p031.set_data(t, co_2)
-
-                ax01.set_title(
-                    f"first MQ9\nLPG: {lpg_1[-1]}, CH4: {ch4_1[-1]}, CO: {co_1_1[-1]}")
-                ax02.set_title(f"first MQ9\nCO: {co_1_2[-1]}")
-                ax03.set_title(f"second MQ9\nCO: {co_2[-1]}")
-
-                append_df = pd.DataFrame(data=[res], 
-                                        index=[x], 
-                                        columns=["LPG", "CH4", "CO", "CO"])
+                # p031.set_data(t, ch4_3)
+                # p032.set_data(t, co_3)
                 
+                # p04.set_data(t, temp)
+
+                ax01.set_title(f"first MQ9\nCH4: {ch4_1[-1]}, CO: {co_1[-1]}")
+                ax02.set_title(f"second MQ9\nCH4: {ch4_2[-1]}, CO: {co_2[-1]}")
+                # ax03.set_title(f"third MQ9\nCH4: {ch4_3[-1]}, CO: {co_3[-1]}")
+                # ax04.set_title(f"temperature\n{temp[-1]} °C")
+
+                append_df = pd.DataFrame(data=[res],
+                                         index=[x],
+                                         columns=["CH4_1", "CO_1",
+                                                  "CH4_2", "CO_2"])
+
                 df = pd.concat([df, append_df])
 
                 df.to_excel(
@@ -156,13 +186,18 @@ def updateDate(self):
                 if x >= xmax-10.00:
                     p011.axes.set_xlim(x-xmax+10.0, x+10.0)
                     p012.axes.set_xlim(x-xmax+10.0, x+10.0)
-                    p013.axes.set_xlim(x-xmax+10.0, x+10.0)
 
                     p021.axes.set_xlim(x-xmax+10.0, x+10.0)
+                    p022.axes.set_xlim(x-xmax+10.0, x+10.0)
 
-                    p031.axes.set_xlim(x-xmax+10.0, x+10.0)
+                    # p031.axes.set_xlim(x-xmax+10.0, x+10.0)
+                    # p032.axes.set_xlim(x-xmax+10.0, x+10.0)
+                    
+                    # p04.axes.set_xlim(x-xmax+10.0, x+10.0)
+                    
+                # if co_1[-1] > ymax - 10.00:
 
-                return p011, p012, p013, p021, p031
+                return p011, p012, p021, p022 #, p031, p032, p04
 
     except Exception as ex:
         print("error")
@@ -221,3 +256,4 @@ anim = animation.FuncAnimation(fig,
 
 plt.show()
 """
+

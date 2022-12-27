@@ -1,5 +1,5 @@
 {
     "sketch": "arduino_gas.ino",
     "board": "arduino:avr:uno",
-    "port": "/dev/tty.usbserial-1130"
+    "port": "/dev/tty.usbserial-140"
 }
