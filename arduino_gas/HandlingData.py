@@ -11,7 +11,7 @@ import openpyxl
 
 ###### configure arduino #####
 
-serial_port = '/dev/tty.usbserial-130'
+serial_port = '/dev/tty.usbserial-2110'
 serial_baudrate = 9600
 
 seri = serial.Serial(serial_port, serial_baudrate)
