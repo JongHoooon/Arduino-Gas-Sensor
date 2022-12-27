@@ -11,7 +11,7 @@ import openpyxl
 
 ###### configure arduino #####
 
-serial_port = '/dev/tty.usbserial-140'
+serial_port = '/dev/tty.usbserial-130'
 serial_baudrate = 9600
 
 seri = serial.Serial(serial_port, serial_baudrate)
@@ -24,11 +24,11 @@ font = {'size': 9}
 rc('font', **font)
 
 # setup figure and subplots
-f0 = figure(num=0, figsize=(16, 6))
+f0 = figure(num=0, figsize=(8, 6))
 f0.suptitle("Off Gas", fontsize=12)
 
-ax01 = subplot2grid((1, 4), (0, 0))
-ax02 = subplot2grid((1, 4), (0, 1))
+ax01 = subplot2grid((1, 2), (0, 0))
+ax02 = subplot2grid((1, 2), (0, 1))
 # ax03 = subplot2grid((1, 4), (0, 2))
 # ax04 = subplot2grid((1, 4), (0, 3))
 
